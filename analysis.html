@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.33">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Connecticut Real Estate Sales Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="analysis_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="analysis_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="analysis_files/libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="analysis_files/libs/bootstrap/bootstrap-bb462d781dde1847d9e3ccf7736099dd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Connecticut Real Estate Sales Analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="fe67c35a" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> ticker</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># supressing pandas warning for this notebook for better clarity</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>warnings.simplefilter(action<span class="op">=</span><span class="st">'ignore'</span>, category<span class="op">=</span><span class="pp">FutureWarning</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="data-importing" class="level2">
+<h2 class="anchored" data-anchor-id="data-importing">Data importing</h2>
+<div id="fd7a4318" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for the dataset refer to: https://catalog.data.gov/dataset/real-estate-sales-2001-2018</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>real_estate_df <span class="op">=</span> pd.read_csv(<span class="st">"./Real_Estate_Sales_2001-2023_GL.csv"</span>, low_memory<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="4f58befd" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>real_estate_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Serial Number</th>
+<th data-quarto-table-cell-role="th">List Year</th>
+<th data-quarto-table-cell-role="th">Date Recorded</th>
+<th data-quarto-table-cell-role="th">Town</th>
+<th data-quarto-table-cell-role="th">Address</th>
+<th data-quarto-table-cell-role="th">Assessed Value</th>
+<th data-quarto-table-cell-role="th">Sale Amount</th>
+<th data-quarto-table-cell-role="th">Sales Ratio</th>
+<th data-quarto-table-cell-role="th">Property Type</th>
+<th data-quarto-table-cell-role="th">Residential Type</th>
+<th data-quarto-table-cell-role="th">Non Use Code</th>
+<th data-quarto-table-cell-role="th">Assessor Remarks</th>
+<th data-quarto-table-cell-role="th">OPM remarks</th>
+<th data-quarto-table-cell-role="th">Location</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2020177</td>
+<td>2020</td>
+<td>04/14/2021</td>
+<td>Ansonia</td>
+<td>323 BEAVER ST</td>
+<td>133000.0</td>
+<td>248400.0</td>
+<td>0.5354</td>
+<td>Residential</td>
+<td>Single Family</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>POINT (-73.06822 41.35014)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2020225</td>
+<td>2020</td>
+<td>05/26/2021</td>
+<td>Ansonia</td>
+<td>152 JACKSON ST</td>
+<td>110500.0</td>
+<td>239900.0</td>
+<td>0.4606</td>
+<td>Residential</td>
+<td>Three Family</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2020348</td>
+<td>2020</td>
+<td>09/13/2021</td>
+<td>Ansonia</td>
+<td>230 WAKELEE AVE</td>
+<td>150500.0</td>
+<td>325000.0</td>
+<td>0.463</td>
+<td>Commercial</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2020090</td>
+<td>2020</td>
+<td>12/14/2020</td>
+<td>Ansonia</td>
+<td>57 PLATT ST</td>
+<td>127400.0</td>
+<td>202500.0</td>
+<td>0.6291</td>
+<td>Residential</td>
+<td>Two Family</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>210288</td>
+<td>2021</td>
+<td>06/20/2022</td>
+<td>Avon</td>
+<td>12 BYRON DRIVE</td>
+<td>179990.0</td>
+<td>362500.0</td>
+<td>0.4965</td>
+<td>Residential</td>
+<td>Condo</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>POINT (-72.879115982 41.773452988)</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="data-cleaning" class="level2">
+<h2 class="anchored" data-anchor-id="data-cleaning">Data cleaning</h2>
+<div id="1bd9fc10" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remove rows that have all NaN values</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>real_estate_df.dropna(how<span class="op">=</span><span class="st">"all"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># renaming column names for clarity</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>real_estate_df <span class="op">=</span> real_estate_df.rename(</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    columns<span class="op">=</span>{</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Date Recorded'</span>: <span class="st">'Recorded Date of Sale'</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">'List Year'</span>: <span class="st">'Year of Listing'</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>real_estate_df.head()</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Serial Number</th>
+<th data-quarto-table-cell-role="th">Year of Listing</th>
+<th data-quarto-table-cell-role="th">Recorded Date of Sale</th>
+<th data-quarto-table-cell-role="th">Town</th>
+<th data-quarto-table-cell-role="th">Address</th>
+<th data-quarto-table-cell-role="th">Assessed Value</th>
+<th data-quarto-table-cell-role="th">Sale Amount</th>
+<th data-quarto-table-cell-role="th">Sales Ratio</th>
+<th data-quarto-table-cell-role="th">Property Type</th>
+<th data-quarto-table-cell-role="th">Residential Type</th>
+<th data-quarto-table-cell-role="th">Non Use Code</th>
+<th data-quarto-table-cell-role="th">Assessor Remarks</th>
+<th data-quarto-table-cell-role="th">OPM remarks</th>
+<th data-quarto-table-cell-role="th">Location</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2020177</td>
+<td>2020</td>
+<td>04/14/2021</td>
+<td>Ansonia</td>
+<td>323 BEAVER ST</td>
+<td>133000.0</td>
+<td>248400.0</td>
+<td>0.5354</td>
+<td>Residential</td>
+<td>Single Family</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>POINT (-73.06822 41.35014)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2020225</td>
+<td>2020</td>
+<td>05/26/2021</td>
+<td>Ansonia</td>
+<td>152 JACKSON ST</td>
+<td>110500.0</td>
+<td>239900.0</td>
+<td>0.4606</td>
+<td>Residential</td>
+<td>Three Family</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2020348</td>
+<td>2020</td>
+<td>09/13/2021</td>
+<td>Ansonia</td>
+<td>230 WAKELEE AVE</td>
+<td>150500.0</td>
+<td>325000.0</td>
+<td>0.463</td>
+<td>Commercial</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2020090</td>
+<td>2020</td>
+<td>12/14/2020</td>
+<td>Ansonia</td>
+<td>57 PLATT ST</td>
+<td>127400.0</td>
+<td>202500.0</td>
+<td>0.6291</td>
+<td>Residential</td>
+<td>Two Family</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>210288</td>
+<td>2021</td>
+<td>06/20/2022</td>
+<td>Avon</td>
+<td>12 BYRON DRIVE</td>
+<td>179990.0</td>
+<td>362500.0</td>
+<td>0.4965</td>
+<td>Residential</td>
+<td>Condo</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>POINT (-72.879115982 41.773452988)</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="data-exploration" class="level2">
+<h2 class="anchored" data-anchor-id="data-exploration">Data exploration</h2>
+<section id="analysis-1a-analyzing-the-percentage-of-real-estate-properties-sold-below-assessed-value-by-year" class="level3">
+<h3 class="anchored" data-anchor-id="analysis-1a-analyzing-the-percentage-of-real-estate-properties-sold-below-assessed-value-by-year">Analysis-1(a): Analyzing the Percentage of Real Estate Properties Sold below Assessed Value by Year</h3>
+<section id="data-cleaning-and-augmentation" class="level4">
+<h4 class="anchored" data-anchor-id="data-cleaning-and-augmentation">Data cleaning and Augmentation</h4>
+<div id="e1434c14" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># filter out the rows where "Recorded Date of Sale" is NaN</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>valid_sales_df <span class="op">=</span> real_estate_df[real_estate_df[<span class="st">"Recorded Date of Sale"</span>].notna()]</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># verifying all NaN values were removed</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>display(valid_sales_df[valid_sales_df[<span class="st">"Recorded Date of Sale"</span>].isna()])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Serial Number</th>
+<th data-quarto-table-cell-role="th">Year of Listing</th>
+<th data-quarto-table-cell-role="th">Recorded Date of Sale</th>
+<th data-quarto-table-cell-role="th">Town</th>
+<th data-quarto-table-cell-role="th">Address</th>
+<th data-quarto-table-cell-role="th">Assessed Value</th>
+<th data-quarto-table-cell-role="th">Sale Amount</th>
+<th data-quarto-table-cell-role="th">Sales Ratio</th>
+<th data-quarto-table-cell-role="th">Property Type</th>
+<th data-quarto-table-cell-role="th">Residential Type</th>
+<th data-quarto-table-cell-role="th">Non Use Code</th>
+<th data-quarto-table-cell-role="th">Assessor Remarks</th>
+<th data-quarto-table-cell-role="th">OPM remarks</th>
+<th data-quarto-table-cell-role="th">Location</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="1db73219" class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># ensuring that the columns are casted to the appropriate data type</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>valid_sales_df[<span class="st">'Recorded Date of Sale'</span>] <span class="op">=</span> valid_sales_df[<span class="st">'Recorded Date of Sale'</span>].astype(<span class="st">'str'</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># identifying that many values in the Date of Sale column have years</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># listed as 0023 instead of 2023 or 0024 instead of 2024, so augmenting</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># the data with the last two digits of the year</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>valid_sales_df[<span class="st">'Year of Sale'</span>] <span class="op">=</span> valid_sales_df[<span class="st">'Recorded Date of Sale'</span>].<span class="bu">apply</span>(</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> x: x.split(<span class="st">'/'</span>)[<span class="dv">2</span>][<span class="dv">2</span>:]</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co"># remove any properties sold outside of 2001-2024</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>valid_sales_df[<span class="st">'Year of Sale'</span>] <span class="op">=</span> valid_sales_df[<span class="st">'Year of Sale'</span>].astype(<span class="st">'int'</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>valid_sales_df <span class="op">=</span> valid_sales_df[</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    (valid_sales_df[<span class="st">'Year of Sale'</span>] <span class="op">&gt;=</span> <span class="dv">1</span>) <span class="op">&amp;</span> (valid_sales_df[<span class="st">'Year of Sale'</span>] <span class="op">&lt;=</span> <span class="dv">24</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co"># correcting the Year values </span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>valid_sales_df[<span class="st">'Year of Sale'</span>] <span class="op">=</span> valid_sales_df[<span class="st">'Year of Sale'</span>].<span class="bu">apply</span>(</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> x: x <span class="op">+</span> <span class="dv">2000</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co"># remove commas from sales ratio</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>valid_sales_df[<span class="st">'Sales Ratio'</span>] <span class="op">=</span> valid_sales_df[<span class="st">'Sales Ratio'</span>].astype(<span class="st">'str'</span>).<span class="bu">apply</span>(</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> x: x.replace(<span class="st">','</span>, <span class="st">''</span>)</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>valid_sales_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="23">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Serial Number</th>
+<th data-quarto-table-cell-role="th">Year of Listing</th>
+<th data-quarto-table-cell-role="th">Recorded Date of Sale</th>
+<th data-quarto-table-cell-role="th">Town</th>
+<th data-quarto-table-cell-role="th">Address</th>
+<th data-quarto-table-cell-role="th">Assessed Value</th>
+<th data-quarto-table-cell-role="th">Sale Amount</th>
+<th data-quarto-table-cell-role="th">Sales Ratio</th>
+<th data-quarto-table-cell-role="th">Property Type</th>
+<th data-quarto-table-cell-role="th">Residential Type</th>
+<th data-quarto-table-cell-role="th">Non Use Code</th>
+<th data-quarto-table-cell-role="th">Assessor Remarks</th>
+<th data-quarto-table-cell-role="th">OPM remarks</th>
+<th data-quarto-table-cell-role="th">Location</th>
+<th data-quarto-table-cell-role="th">Year of Sale</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2020177</td>
+<td>2020</td>
+<td>04/14/2021</td>
+<td>Ansonia</td>
+<td>323 BEAVER ST</td>
+<td>133000.0</td>
+<td>248400.0</td>
+<td>0.5354</td>
+<td>Residential</td>
+<td>Single Family</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>POINT (-73.06822 41.35014)</td>
+<td>2021</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2020225</td>
+<td>2020</td>
+<td>05/26/2021</td>
+<td>Ansonia</td>
+<td>152 JACKSON ST</td>
+<td>110500.0</td>
+<td>239900.0</td>
+<td>0.4606</td>
+<td>Residential</td>
+<td>Three Family</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2021</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2020348</td>
+<td>2020</td>
+<td>09/13/2021</td>
+<td>Ansonia</td>
+<td>230 WAKELEE AVE</td>
+<td>150500.0</td>
+<td>325000.0</td>
+<td>0.463</td>
+<td>Commercial</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2021</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2020090</td>
+<td>2020</td>
+<td>12/14/2020</td>
+<td>Ansonia</td>
+<td>57 PLATT ST</td>
+<td>127400.0</td>
+<td>202500.0</td>
+<td>0.6291</td>
+<td>Residential</td>
+<td>Two Family</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2020</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>210288</td>
+<td>2021</td>
+<td>06/20/2022</td>
+<td>Avon</td>
+<td>12 BYRON DRIVE</td>
+<td>179990.0</td>
+<td>362500.0</td>
+<td>0.4965</td>
+<td>Residential</td>
+<td>Condo</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>POINT (-72.879115982 41.773452988)</td>
+<td>2022</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="visualization-and-insights" class="level4">
+<h4 class="anchored" data-anchor-id="visualization-and-insights">Visualization and Insights</h4>
+<div id="4182c9aa" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>analysis_1_df <span class="op">=</span> valid_sales_df</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>x_data <span class="op">=</span> analysis_1_df[<span class="st">'Year of Sale'</span>].unique()</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>total_df <span class="op">=</span> analysis_1_df.groupby([<span class="st">'Year of Sale'</span>]).count()[<span class="st">'Serial Number'</span>]</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>sales_ratio_df <span class="op">=</span> analysis_1_df[analysis_1_df[<span class="st">'Sales Ratio'</span>].astype(<span class="st">'float'</span>) <span class="op">&gt;</span> <span class="fl">1.0</span>]</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>below_df <span class="op">=</span> sales_ratio_df.groupby([<span class="st">'Year of Sale'</span>]).count()[<span class="st">'Serial Number'</span>]</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>y_data <span class="op">=</span> (below_df <span class="op">/</span> total_df) <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>,<span class="dv">6</span>))</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>bars <span class="op">=</span> ax.bar(x_data, y_data, width<span class="op">=</span><span class="fl">0.6</span>, color<span class="op">=</span><span class="st">"#4a90e2"</span>, edgecolor<span class="op">=</span><span class="st">"none"</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Percentage of Properties Sold Below Assessed Value per Year in Connecticut"</span>, fontsize<span class="op">=</span><span class="dv">12</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Percentage (%)"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Year"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>plt.xticks(x_data, rotation<span class="op">=</span><span class="dv">90</span>, size<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>plt.yticks(size<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>ax.grid(axis<span class="op">=</span><span class="st">"y"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> bar <span class="kw">in</span> bars:</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    bar.set_zorder(<span class="dv">3</span>)</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    bar.set_linewidth(<span class="dv">0</span>)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/cell-8-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="analysis-1b-analyzing-the-number-of-real-estate-properties-sold-below-assessed-value-as-compared-to-total-properties-sold-by-year" class="level3">
+<h3 class="anchored" data-anchor-id="analysis-1b-analyzing-the-number-of-real-estate-properties-sold-below-assessed-value-as-compared-to-total-properties-sold-by-year">Analysis-1(b): Analyzing the Number of Real Estate Properties Sold below Assessed Value as Compared to Total Properties Sold by Year</h3>
+<section id="visualization-and-insights-1" class="level4">
+<h4 class="anchored" data-anchor-id="visualization-and-insights-1">Visualization and Insights</h4>
+<div id="1c45daf5" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># total properties per year</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>total_df <span class="op">=</span> analysis_1_df.groupby(<span class="st">'Year of Sale'</span>).count()[<span class="st">'Serial Number'</span>]</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>below_df <span class="op">=</span> analysis_1_df[</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    analysis_1_df[<span class="st">'Sales Ratio'</span>].astype(<span class="bu">float</span>) <span class="op">&gt;</span> <span class="fl">1.0</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>].groupby(<span class="st">'Year of Sale'</span>).count()[<span class="st">'Serial Number'</span>]</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>below_df <span class="op">=</span> below_df.reindex(total_df.index, fill_value<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>x_data <span class="op">=</span> total_df.index</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>total_values <span class="op">=</span> total_df.values</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>below_values <span class="op">=</span> below_df.values</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>,<span class="dv">6</span>))</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>bars <span class="op">=</span> ax.bar(x_data, total_values, color<span class="op">=</span><span class="st">"#d0e2f2"</span>, width<span class="op">=</span><span class="fl">0.6</span>, label<span class="op">=</span><span class="st">"Total Properties"</span>)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>ax.bar(x_data, below_values, color<span class="op">=</span><span class="st">"#4a90e2"</span>, width<span class="op">=</span><span class="fl">0.6</span>, label<span class="op">=</span><span class="st">"Sold Below Assessed Value"</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Real Estate Properties Sold per Year in Connecticut</span><span class="ch">\n</span><span class="st">(Highlighted = Sold Below Assessed Value)"</span>, fontsize<span class="op">=</span><span class="dv">12</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Number of Properties Sold"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Year"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>plt.xticks(x_data, rotation<span class="op">=</span><span class="dv">90</span>, size<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>plt.yticks(size<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>ax.grid(axis<span class="op">=</span><span class="st">"y"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/cell-9-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Insights</strong> : Connecticut’s real estate market hit its peak in the mid-2000s but dropped off sharply during the 2008 financial crisis, when many properties sold for less than their assessed values. While the market gradually recovered and even surged during the pandemic in 2020–2021, overall sales have slowed noticeably since 2022. Still, the number of sales falling below assessed value has stayed relatively low.</p>
+</section>
+</section>
+<section id="analysis-2-analyzing-the-number-of-housing-properties-sold-below-assessed-value-as-compared-to-total-housing-properties-sold-by-year" class="level3">
+<h3 class="anchored" data-anchor-id="analysis-2-analyzing-the-number-of-housing-properties-sold-below-assessed-value-as-compared-to-total-housing-properties-sold-by-year">Analysis-2: Analyzing the Number of “Housing” Properties Sold below Assessed Value as Compared to Total Housing Properties Sold by Year</h3>
+<section id="data-cleaning-augmentation" class="level4">
+<h4 class="anchored" data-anchor-id="data-cleaning-augmentation">Data Cleaning &amp; Augmentation</h4>
+<div id="39111bbf" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># exploring the unique Property Type values</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>valid_sales_df[<span class="st">'Property Type'</span>].unique()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>array(['Residential', 'Commercial', 'Vacant Land', 'Public Utility',
+       'Apartments', 'Industrial', nan, 'Condo', 'Two Family',
+       'Single Family', 'Three Family', 'Four Family'], dtype=object)</code></pre>
+</div>
+</div>
+<div id="ccb22686" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># filtering in all Housing properties</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>analysis_2_df <span class="op">=</span> valid_sales_df[valid_sales_df[<span class="st">'Property Type'</span>].isin((</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Residential'</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Apartments'</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Condo'</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Single Family'</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Two Family'</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Three Family'</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Four Family'</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>))]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>NOTE:</strong> There is insufficient data for years 2001-2006 so filtering that data out</p>
+<div id="acbeeff6" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># filtering out the data before 2007</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>analysis_2_df <span class="op">=</span> analysis_2_df[analysis_2_df[<span class="st">'Year of Sale'</span>] <span class="op">&gt;</span> <span class="dv">2006</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="visualization-insights" class="level4">
+<h4 class="anchored" data-anchor-id="visualization-insights">Visualization &amp; Insights</h4>
+<div id="c0ab33c2" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># total properties per year</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>total_df <span class="op">=</span> analysis_2_df.groupby(<span class="st">'Year of Sale'</span>).count()[<span class="st">'Serial Number'</span>]</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>below_df <span class="op">=</span> analysis_2_df[</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    analysis_2_df[<span class="st">'Sales Ratio'</span>].astype(<span class="bu">float</span>) <span class="op">&gt;</span> <span class="fl">1.0</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>].groupby(<span class="st">'Year of Sale'</span>).count()[<span class="st">'Serial Number'</span>]</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>below_df <span class="op">=</span> below_df.reindex(total_df.index, fill_value<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>x_data <span class="op">=</span> total_df.index</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>total_values <span class="op">=</span> total_df.values</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>below_values <span class="op">=</span> below_df.values</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>,<span class="dv">6</span>))</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>bars <span class="op">=</span> ax.bar(x_data, total_values, color<span class="op">=</span><span class="st">"#d0e2f2"</span>, width<span class="op">=</span><span class="fl">0.6</span>, label<span class="op">=</span><span class="st">"Total Properties"</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>ax.bar(x_data, below_values, color<span class="op">=</span><span class="st">"#4a90e2"</span>, width<span class="op">=</span><span class="fl">0.6</span>, label<span class="op">=</span><span class="st">"Sold Below Assessed Value"</span>)</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Housing Properties sold in Connecticut"</span>, fontsize<span class="op">=</span><span class="dv">12</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Number of Housing Properties Sold"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Year"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>plt.xticks(x_data, rotation<span class="op">=</span><span class="dv">90</span>, size<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>plt.yticks(size<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>ax.grid(axis<span class="op">=</span><span class="st">"y"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="co"># legend</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>ax.legend(frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/cell-13-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Insights</strong> : Connecticut’s housing market has come a long way since the 2008 financial crisis, when distressed sales were common and many homes sold below their assessed values. Although total sales hit record highs during the pandemic, the noticeable drop since 2022 points to cooling demand, likely influenced by rising interest rates and growing affordability concerns in the US as a whole.</p>
+</section>
+</section>
+<section id="analysis-3-analyzing-different-housing-property-price-trends-over-a-decade" class="level3">
+<h3 class="anchored" data-anchor-id="analysis-3-analyzing-different-housing-property-price-trends-over-a-decade">Analysis-3: Analyzing Different “Housing” Property Price Trends over a Decade</h3>
+<section id="data-cleaning-augmentation-1" class="level4">
+<h4 class="anchored" data-anchor-id="data-cleaning-augmentation-1">Data Cleaning &amp; Augmentation</h4>
+<div id="ce3e85f4" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># creating a new dataframe with required property types</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>housing_property_df <span class="op">=</span>  valid_sales_df[valid_sales_df[<span class="st">'Property Type'</span>].isin((</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Condo'</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Single Family'</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Two Family'</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Three Family'</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Four Family'</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>))]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>NOTE:</strong> There is insufficient data for years 2001-2006 so filtering out that data</p>
+<div id="a9bfb527" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># filtering out the data before 2007</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>housing_property_df <span class="op">=</span> housing_property_df[(housing_property_df[<span class="st">'Year of Sale'</span>] <span class="op">&gt;=</span> <span class="dv">2007</span>) <span class="op">&amp;</span> (housing_property_df[<span class="st">'Year of Sale'</span>] <span class="op">&lt;=</span> <span class="dv">2016</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="e6920dee" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># creating a new dataframe with columns containing average prices of each property type</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>analysis_3_df <span class="op">=</span> housing_property_df.groupby([<span class="st">'Property Type'</span>, <span class="st">'Year of Sale'</span>])[<span class="st">'Sale Amount'</span>].mean().<span class="bu">apply</span>(<span class="kw">lambda</span> x: <span class="bu">round</span>(x, <span class="dv">2</span>))</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>analysis_3_df <span class="op">=</span> analysis_3_df.unstack(<span class="st">'Property Type'</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>display(analysis_3_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Property Type</th>
+<th data-quarto-table-cell-role="th">Condo</th>
+<th data-quarto-table-cell-role="th">Four Family</th>
+<th data-quarto-table-cell-role="th">Single Family</th>
+<th data-quarto-table-cell-role="th">Three Family</th>
+<th data-quarto-table-cell-role="th">Two Family</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">Year of Sale</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2007</td>
+<td>268302.92</td>
+<td>277945.14</td>
+<td>499665.38</td>
+<td>281199.89</td>
+<td>283910.02</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2008</td>
+<td>253857.84</td>
+<td>226540.56</td>
+<td>416020.20</td>
+<td>194028.04</td>
+<td>219458.83</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2009</td>
+<td>225220.19</td>
+<td>169820.03</td>
+<td>345669.88</td>
+<td>124529.53</td>
+<td>167327.14</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2010</td>
+<td>233047.91</td>
+<td>148278.60</td>
+<td>389414.13</td>
+<td>125698.18</td>
+<td>153493.87</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2011</td>
+<td>220901.54</td>
+<td>139957.44</td>
+<td>350549.22</td>
+<td>122249.85</td>
+<td>139749.84</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2012</td>
+<td>232790.10</td>
+<td>185732.42</td>
+<td>421288.96</td>
+<td>134578.81</td>
+<td>161135.57</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2013</td>
+<td>230723.61</td>
+<td>185330.34</td>
+<td>399794.42</td>
+<td>153019.17</td>
+<td>174990.07</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2014</td>
+<td>241354.86</td>
+<td>228338.76</td>
+<td>380017.54</td>
+<td>137864.14</td>
+<td>170503.82</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2015</td>
+<td>231117.66</td>
+<td>237385.00</td>
+<td>372393.14</td>
+<td>157303.07</td>
+<td>175452.15</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2016</td>
+<td>459960.52</td>
+<td>257397.26</td>
+<td>325380.50</td>
+<td>167758.29</td>
+<td>177430.87</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="visualizations-insights" class="level4">
+<h4 class="anchored" data-anchor-id="visualizations-insights">Visualizations &amp; Insights</h4>
+<div id="c52f7130" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>color_cycle <span class="op">=</span> plt.cm.Set2.colors  </span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, prop <span class="kw">in</span> <span class="bu">enumerate</span>(analysis_3_df.columns):</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    plt.plot(analysis_3_df.index, analysis_3_df[prop], marker<span class="op">=</span><span class="st">'o'</span>, label<span class="op">=</span>prop, color<span class="op">=</span>color_cycle[i <span class="op">%</span> <span class="bu">len</span>(color_cycle)])</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>plt.xticks(np.arange(<span class="dv">2007</span>, <span class="dv">2017</span>, <span class="dv">1</span>))</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Year"</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Average Sale Price"</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Price Trends in Connecticut’s Housing Market (2007–2016)"</span>,fontsize<span class="op">=</span><span class="dv">12</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>plt.legend(</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Property Type"</span>,</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    loc<span class="op">=</span><span class="st">"upper left"</span>,</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    bbox_to_anchor<span class="op">=</span>(<span class="fl">1.02</span>, <span class="dv">1</span>),</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    borderaxespad<span class="op">=</span><span class="dv">0</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, which<span class="op">=</span><span class="st">"both"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/cell-17-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Insights</strong> : Over the past decade, Connecticut’s housing market has gradually moved away from being dominated by single-family homes, with condos leading the way. Meanwhile, multi-family properties seem to be growing steadliy post the 2008 crisis sell-off.</p>
+</section>
+</section>
+<section id="analysis-4-analyzing-the-relationship-between-assessed-values-and-sale-amounts-for-commercial-properties-across-towns-over-the-period-20202024" class="level3">
+<h3 class="anchored" data-anchor-id="analysis-4-analyzing-the-relationship-between-assessed-values-and-sale-amounts-for-commercial-properties-across-towns-over-the-period-20202024">Analysis-4: Analyzing the Relationship between Assessed Values and Sale Amounts for “Commercial” Properties across Towns over the Period 2020–2024</h3>
+<section id="data-cleaning-augmentation-2" class="level4">
+<h4 class="anchored" data-anchor-id="data-cleaning-augmentation-2">Data Cleaning &amp; Augmentation</h4>
+<div id="a089efcd" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># filtering data with Towns listed below</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co"># major_towns: Bridgeport, Stamford, Danbury, New Haven</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># developing_towns: Hartford, Middletown, Manchester</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co"># small_towns: Roxbury, Washington</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>selected_towns_df <span class="op">=</span> valid_sales_df[valid_sales_df[<span class="st">'Town'</span>].isin((</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Bridgeport'</span>,</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Stamford'</span>,</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Danbury'</span>,</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'New Haven'</span>,</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Hartford'</span>,</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Middletown'</span>,</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Manchester'</span>,</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Roxbury'</span>,</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Washington'</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>))]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="6d187bec" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># filtering out data whose Property Type is not Commercial</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>selected_towns_df <span class="op">=</span> selected_towns_df[selected_towns_df[<span class="st">'Property Type'</span>] <span class="op">==</span> <span class="st">"Commercial"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="31335c5e" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># filtering Year of Sale in order to calculate an average of 5 years from 2020-2024</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>selected_towns_df <span class="op">=</span> selected_towns_df[selected_towns_df[<span class="st">'Year of Sale'</span>] <span class="op">&gt;=</span> <span class="dv">2020</span>]</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>selected_towns_df[<span class="st">'Year of Sale'</span>].unique()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="20">
+<pre><code>array([2022, 2021, 2020, 2023, 2024])</code></pre>
+</div>
+</div>
+<div id="64aac04f" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># creating a new dataframe with columns containing average assessed value and average sales amount for each town</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>assessed_value_avg <span class="op">=</span> selected_towns_df.groupby(<span class="st">'Town'</span>)[<span class="st">'Assessed Value'</span>].mean().<span class="bu">apply</span>(<span class="kw">lambda</span> x: <span class="bu">round</span>(x, <span class="dv">2</span>))</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>sale_amount_avg <span class="op">=</span> selected_towns_df.groupby(<span class="st">'Town'</span>)[<span class="st">'Sale Amount'</span>].mean().<span class="bu">apply</span>(<span class="kw">lambda</span> x: <span class="bu">round</span>(x, <span class="dv">2</span>))</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>analysis_4_df <span class="op">=</span> pd.concat([assessed_value_avg, sale_amount_avg], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>analysis_4_df[<span class="st">'Assessed Value'</span>] <span class="op">=</span> analysis_4_df[<span class="st">'Assessed Value'</span>].astype(<span class="st">'int32'</span>) <span class="op">/</span> <span class="dv">1000000</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>analysis_4_df[<span class="st">'Sale Amount'</span>] <span class="op">=</span> analysis_4_df[<span class="st">'Sale Amount'</span>].astype(<span class="st">'int32'</span>) <span class="op">/</span> <span class="dv">1000000</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>display(analysis_4_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Assessed Value</th>
+<th data-quarto-table-cell-role="th">Sale Amount</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">Town</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Bridgeport</td>
+<td>2.575769</td>
+<td>0.572368</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Danbury</td>
+<td>1.465342</td>
+<td>2.660716</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Hartford</td>
+<td>0.469978</td>
+<td>0.898564</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Manchester</td>
+<td>0.820900</td>
+<td>1.886463</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Middletown</td>
+<td>0.647439</td>
+<td>1.068589</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">New Haven</td>
+<td>1.260039</td>
+<td>2.531051</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Roxbury</td>
+<td>0.198855</td>
+<td>0.303870</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Stamford</td>
+<td>5.803770</td>
+<td>4.673702</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Washington</td>
+<td>0.364321</td>
+<td>0.561750</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="visualizations-insights-1" class="level4">
+<h4 class="anchored" data-anchor-id="visualizations-insights-1">Visualizations &amp; Insights</h4>
+<div id="75e2d591" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">7</span>))</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>plt.scatter(analysis_4_df[<span class="st">'Assessed Value'</span>], analysis_4_df[<span class="st">'Sale Amount'</span>], color<span class="op">=</span><span class="st">"#4a90e2"</span>, alpha<span class="op">=</span><span class="dv">1</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>, s<span class="op">=</span><span class="dv">80</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>formatter <span class="op">=</span> ticker.ScalarFormatter()</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>formatter.set_scientific(<span class="va">False</span>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> town <span class="kw">in</span> analysis_4_df.index:</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    plt.text(analysis_4_df.loc[town, <span class="st">'Assessed Value'</span>] <span class="op">+</span> <span class="fl">0.09</span>,</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>             analysis_4_df.loc[town, <span class="st">'Sale Amount'</span>] <span class="op">-</span> <span class="fl">0.09</span>,</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>             town,</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>             fontsize<span class="op">=</span><span class="dv">9</span>)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="co"># drawing y=x line</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>plt.plot([<span class="dv">0</span>, <span class="dv">6</span>], [<span class="dv">0</span>, <span class="dv">6</span>],</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>         color<span class="op">=</span><span class="st">'black'</span>,</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>         linewidth<span class="op">=</span><span class="fl">1.0</span>,</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>         alpha<span class="op">=</span><span class="fl">0.3</span>,</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>         label<span class="op">=</span><span class="st">'Break Even Line'</span>)</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Average Assessed Value (millions)"</span>)</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Average Sale Amount (millions)"</span>)</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Average Assessed Value vs. Average Sale Amount</span><span class="ch">\n</span><span class="st">for Commercial Properties Across 9 Connecticut Towns (2020–2024)"</span>, fontsize<span class="op">=</span><span class="dv">12</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a><span class="co"># setting increments of 0.5 million for both axes</span></span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(<span class="fl">0.5</span>))</span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>plt.gca().yaxis.set_major_locator(ticker.MultipleLocator(<span class="fl">0.5</span>))</span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>plt.gca().xaxis.set_major_formatter(formatter)</span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>plt.gca().yaxis.set_major_formatter(formatter)</span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/cell-22-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Insights</strong>: Urban centers like New Haven and Danbury seem to have stronger market demand than their assessed property values suggest, while places like Bridgeport and Stamford might be dealing with signs of overvaluation. In contrast, mid-sized and growing towns such as Middletown, Hartford, Washington, and Roxbury show consistent trends where sale prices exceed assessments, pointing to steady market performance and potential for stable growth.</p>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
