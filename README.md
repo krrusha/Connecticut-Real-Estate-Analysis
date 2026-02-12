@@ -30,13 +30,3 @@ https://catalog.data.gov/dataset/real-estate-sales-2001-2018
 
 Dataset file used in this repo:
 - `Real_Estate_Sales_2001-2023_GL.csv`
-
-
-
-## Repository Structure
-```text
-.
-├── index.html              # Case study page (charts + insights)
-├── analysis.ipynb          # Full notebook (cleaning + analysis)
-├── analysis_files/         # Exported figures used by index.html
-└── Real_Estate_Sales_2001-2023_GL.csv
