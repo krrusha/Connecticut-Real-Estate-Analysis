@@ -1,1 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Connecticut Real Estate Sales — Case Study</title>
+  <style>
+    :root{
+      --bg:#0b0f17; --card:#101827; --text:#e8eefc; --muted:#a7b3cc;
+      --border:rgba(255,255,255,.10); --accent:#6aa8ff; --max:980px;
+    }
+    *{ box-sizing:border-box; }
+    body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:var(--bg); color:var(--text); }
+    main{ max-width:var(--max); margin:0 auto; padding:28px 16px 60px; }
+    header{ padding:18px 18px; border:1px solid var(--border); border-radius:16px; background:linear-gradient(180deg, rgba(106,168,255,.12), transparent); }
+    h1{ margin:0 0 8px; font-size:28px; letter-spacing:.2px; }
+    p{ margin:0; color:var(--muted); line-height:1.5; }
+    .row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+    .btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 12px; border:1px solid var(--border); border-radius:12px;
+      color:var(--text); text-decoration:none; background:rgba(255,255,255,.03);
+    }
+    .btn:hover{ border-color:rgba(106,168,255,.55); }
+    .pill{ display:inline-block; padding:4px 10px; border:1px solid var(--border); border-radius:999px; font-size:12px; color:var(--muted); }
+    .kpis{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; margin:16px 0 4px; }
+    .card{ border:1px solid var(--border); border-radius:16px; padding:14px; background:rgba(255,255,255,.03); }
+    .kpi-title{ color:var(--muted); font-size:12px; margin-bottom:8px; }
+    .kpi-value{ font-size:18px; font-weight:700; }
+    h2{ margin:22px 0 10px; font-size:18px; }
+    ul{ margin:8px 0 0 18px; color:var(--muted); }
+    figure{ margin:14px 0; border:1px solid var(--border); border-radius:16px; padding:12px; background:rgba(255,255,255,.02); }
+    figure img{ width:100%; height:auto; display:block; border-radius:12px; }
+    figcaption{ margin:10px 0 0; color:var(--text); font-weight:650; }
+    .note{ margin-top:10px; color:var(--muted); font-size:13px; }
+    footer{ margin-top:22px; padding-top:14px; border-top:1px solid var(--border); color:var(--muted); font-size:13px; }
+    @media (max-width:820px){ .kpis{ grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Connecticut Real Estate Sales Analysis</h1>
+      <p>
+        Employer-facing case study summarizing market cycles, below-assessed sales, housing price trends,
+        and commercial valuation gaps using Connecticut property transaction data.
+      </p>
+
+      <div class="row" style="margin-top:12px;">
+        <span class="pill">pandas</span>
+        <span class="pill">data cleaning</span>
+        <span class="pill">EDA</span>
+        <span class="pill">matplotlib</span>
+        <span class="pill">storytelling</span>
+      </div>
+
+      <div class="row">
+        <a class="btn" href="./report.html">Full report (details)</a>
+        <!-- Replace YOUR_GITHUB_USERNAME if you want this link to work perfectly -->
+        <a class="btn" href="https://github.com/YOUR_GITHUB_USERNAME/Connecticut-Real-Estate-Analysis" target="_blank" rel="noopener">Repo</a>
+        <a class="btn" href="https://github.com/YOUR_GITHUB_USERNAME/Connecticut-Real-Estate-Analysis/blob/main/analysis.ipynb" target="_blank" rel="noopener">Notebook</a>
+      </div>
+
+      <div class="kpis">
+        <div class="card">
+          <div class="kpi-title">Scope</div>
+          <div class="kpi-value">2001–2024</div>
+        </div>
+        <div class="card">
+          <div class="kpi-title">Core metric</div>
+          <div class="kpi-value">Sales Ratio (assessed ÷ sale)</div>
+        </div>
+        <div class="card">
+          <div class="kpi-title">Key skill</div>
+          <div class="kpi-value">Cleaning + aggregation + insights</div>
+        </div>
+      </div>
+
+      <p class="note">
+        Note: GitHub shows HTML as code by default — this page is meant to be viewed via <strong>GitHub Pages</strong>.
+      </p>
+    </header>
+
+    <h2>Questions answered</h2>
+    <ul>
+      <li>How did sales volume change across economic periods (2008 crash, pandemic, post-2022 cooling)?</li>
+      <li>When did “below assessed value” sales spike, and how did it normalize?</li>
+      <li>How did average housing prices shift across property types over time?</li>
+      <li>Do commercial assessed values align with sale prices across towns (2020–2024)?</li>
+    </ul>
+
+    <h2>Findings</h2>
+
+    <figure>
+      <img src="./analysis_files/figure-html/cell-9-output-1.png" alt="Total properties sold vs sold below assessed value by year" />
+      <figcaption>Market cycle + below-assessed sales (All properties)</figcaption>
+      <ul>
+        <li>Sales volume peaks pre-2008, drops sharply during the financial crisis, then recovers.</li>
+        <li>Post-2022 slowdown is visible in total sales volume.</li>
+        <li>Below-assessed sales stay relatively low outside of stress periods.</li>
+      </ul>
+    </figure>
+
+    <figure>
+      <img src="./analysis_files/figure-html/cell-13-output-1.png" alt="Housing properties sold vs sold below assessed value by year" />
+      <figcaption>Housing-only view (Residential + multi-family)</figcaption>
+      <ul>
+        <li>Housing follows the same macro pattern: 2008 dip, pandemic surge, cooling after 2022.</li>
+        <li>Interpretation: affordability/interest rates likely contribute to the cooling demand.</li>
+      </ul>
+    </figure>
+
+    <figure>
+      <img src="./analysis_files/figure-html/cell-17-output-1.png" alt="Price trends in Connecticut housing market by property type from 2007 to 2016" />
+      <figcaption>Average sale price trends by housing type (2007–2016)</figcaption>
+      <ul>
+        <li>Shows which housing types recovered fastest post-2008.</li>
+        <li>Multi-family categories show steady post-crisis behavior vs single-family swings.</li>
+      </ul>
+    </figure>
+
+    <figure>
+      <img src="./analysis_files/figure-html/cell-22-output-1.png" alt="Average assessed value vs average sale amount for commercial properties across selected towns" />
+      <figcaption>Commercial valuation gaps by town (2020–2024)</figcaption>
+      <ul>
+        <li>Towns above the break-even line suggest sale prices exceed assessments (strong demand).</li>
+        <li>Towns below suggest possible over-assessment or weaker demand.</li>
+      </ul>
+    </figure>
+
+    <h2>What I did (short method)</h2>
+    <ul>
+      <li>Standardized date fields and fixed inconsistent year formatting (e.g., 0023 → 2023).</li>
+      <li>Filtered to housing categories for housing-specific trends; kept commercial separate for town comparison.</li>
+      <li>Grouped by year / town / property type to compute counts, shares, and average prices.</li>
+    </ul>
+
+    <footer>
+      Tip: Keep the full technical detail in <code>report.html</code> + <code>analysis.ipynb</code>, and keep <code>index.html</code> for the “what matters” story.
+    </footer>
+  </main>
+</body>
+</html>
 
